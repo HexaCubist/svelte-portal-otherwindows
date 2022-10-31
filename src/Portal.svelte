@@ -2,12 +2,13 @@
   import { tick } from "svelte";
 
   /**
-   * Usage: <div use:portal={'css selector'}> or <div use:portal={document.body}>
+   * Usage: <div use:portal={'css selector'}> or <div use:portal={document.body}> or <div use:portal={document.body} window={otherwindowcontext}>
    *
    * @param {HTMLElement} el
    * @param {HTMLElement|string} target DOM Element or CSS Selector
+   * @param {Window} [targetWindow] Target window DOM to use for globals. Required for cross-iframe portals
    */
-  export function portal(el, target = "body") {
+  export function portal(el, target = "body", targetWindow = undefined) {
     let targetEl;
     async function update(newTarget) {
       target = newTarget;
@@ -22,7 +23,9 @@
             `No element found matching css selector: "${target}"`
           );
         }
-      } else if (target instanceof HTMLElement) {
+      } else if (!targetWindow && target instanceof HTMLElement) {
+        targetEl = target;
+      } else if (targetWindow && target instanceof targetWindow.HTMLElement) {
         targetEl = target;
       } else {
         throw new TypeError(
